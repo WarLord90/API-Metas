@@ -7,6 +7,7 @@ namespace API_Metas
     {
         public DbSet<Estatus> Estatus { get; set; }
         public DbSet<Metas> Metas { get; set; }
+        public DbSet<Tareas> Tareas { get; set; }
         public AplicationDbContext(DbContextOptions<AplicationDbContext> options) : base(options)
         {
 
