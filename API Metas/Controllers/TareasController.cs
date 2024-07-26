@@ -46,7 +46,6 @@ namespace API_Metas.Controllers
             }
         }
 
-
         // POST: api/Tareas
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Tareas tareas)
@@ -54,6 +53,14 @@ namespace API_Metas.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                // Verificar si existe una tarea con el mismo nombre y el mismo IdMeta
+                bool existeTarea = await _context.Tareas.AnyAsync(t => t.NombreTarea == tareas.NombreTarea && t.IdMeta == tareas.IdMeta);
+
+                if (existeTarea)
+                {
+                    return Conflict("Ya existe una tarea con el mismo nombre para la misma meta.");
+                }
+
                 _context.Add(tareas);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -65,6 +72,7 @@ namespace API_Metas.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         // PUT: api/TareasController/Editar/5
         [HttpPut("{id}")]

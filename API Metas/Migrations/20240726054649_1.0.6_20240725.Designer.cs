@@ -4,6 +4,7 @@ using API_Metas;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace API_Metas.Migrations
 {
     [DbContext(typeof(AplicationDbContext))]
-    partial class AplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240726054649_1.0.6_20240725")]
+    partial class _106_20240725
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -89,9 +92,6 @@ namespace API_Metas.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("IdEstatus")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdMeta")
                         .HasColumnType("int");
 
                     b.Property<string>("NombreTarea")

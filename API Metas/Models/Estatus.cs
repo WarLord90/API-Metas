@@ -8,8 +8,7 @@ namespace API_Metas.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int IdEstatus { get; set; }
-
         public string NombreEstatus { get; set; }
-        public int Porcentaje { get; set; }
+        public bool Activo { get; set; }
     }
 }

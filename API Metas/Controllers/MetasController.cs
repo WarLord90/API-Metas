@@ -21,7 +21,7 @@ namespace API_Metas.Controllers
         {
             try
             {
-                var lstMetas = await _context.Metas.ToListAsync();
+                var lstMetas = await _context.Metas.Where(x => x.Activo==true).ToListAsync();
                 return Ok(lstMetas);
             }
             catch (Exception ex)
@@ -45,6 +45,34 @@ namespace API_Metas.Controllers
             }
         }
 
+        // GET: api/Tareas/Detalle/5
+        [HttpGet("Tareas/{id}")]
+        public async Task<IActionResult> DetailsMeta(int id)
+        {
+            try
+            {
+                var lstTareas = await _context.Tareas.Where(t => t.IdMeta == id)
+            .Join(
+                _context.Estatus,
+                tarea => tarea.IdEstatus,
+                estatus => estatus.IdEstatus,
+                (tarea, estatus) => new
+                {
+                    tarea.IdTarea,
+                    tarea.NombreTarea,
+                    tarea.FechaRegistro,
+                    EstatusNombre = estatus.NombreEstatus
+                }
+            )
+            .ToListAsync();
+                return Ok(lstTareas);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // POST: api/Metas
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Metas metas)
@@ -52,6 +80,12 @@ namespace API_Metas.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
+                bool existeMeta = await _context.Metas.AnyAsync(m => m.NombreMeta == metas.NombreMeta);
+                if (existeMeta)
+                {
+                    return Conflict("Ya existe una meta con el mismo nombre.");
+                }
+
                 _context.Add(metas);
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
@@ -72,14 +106,30 @@ namespace API_Metas.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Verifica si el ID proporcionado coincide con el ID del objeto
-                if (id != metas.IdMeta)
+                // Obtiene la entidad existente
+                var existingMeta = await _context.Metas.FindAsync(id);
+
+                if (existingMeta == null)
                 {
                     return NotFound();
                 }
 
-                // Actualiza la entidad
-                _context.Update(metas);
+                // Verifica si el NombreMeta ya existe en otra meta
+                var metaConMismoNombre = await _context.Metas
+                    .Where(m => m.NombreMeta == metas.NombreMeta && m.IdMeta != id)
+                    .FirstOrDefaultAsync();
+
+                if (metaConMismoNombre != null)
+                {
+                    return Conflict("Ya existe una meta con el mismo nombre.");
+                }
+
+                // Actualiza solo los campos necesarios
+                existingMeta.NombreMeta = metas.NombreMeta;
+                existingMeta.FechaActualizacion = DateTime.UtcNow; // O la fecha que necesites
+
+                // Marca la entidad como modificada
+                _context.Metas.Update(existingMeta);
                 await _context.SaveChangesAsync();
 
                 // Confirma la transacción
@@ -93,7 +143,6 @@ namespace API_Metas.Controllers
                 return BadRequest(ex.Message);
             }
         }
-
 
         // POST: api/MetasController/Eliminar/5
         [HttpDelete("{id}")]
