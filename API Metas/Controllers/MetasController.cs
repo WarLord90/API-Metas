@@ -61,6 +61,7 @@ namespace API_Metas.Controllers
                     tarea.IdTarea,
                     tarea.NombreTarea,
                     tarea.FechaRegistro,
+                    tarea.IdMeta,
                     EstatusNombre = estatus.NombreEstatus
                 }
             )
