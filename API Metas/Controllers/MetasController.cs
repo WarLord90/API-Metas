@@ -51,21 +51,31 @@ namespace API_Metas.Controllers
         {
             try
             {
-                var lstTareas = await _context.Tareas.Where(t => t.IdMeta == id)
-            .Join(
-                _context.Estatus,
-                tarea => tarea.IdEstatus,
-                estatus => estatus.IdEstatus,
-                (tarea, estatus) => new
-                {
-                    tarea.IdTarea,
-                    tarea.NombreTarea,
-                    tarea.FechaRegistro,
-                    tarea.IdMeta,
-                    EstatusNombre = estatus.NombreEstatus
-                }
-            )
-            .ToListAsync();
+                var lstTareas = await _context.Tareas
+                    .Where(t => t.IdMeta == id)
+                    .Join(
+                        _context.Estatus,
+                        tarea => tarea.IdEstatus,
+                        estatus => estatus.IdEstatus,
+                        (tarea, estatus) => new { tarea, estatus }
+                    )
+                    .Join(
+                        _context.Metas,
+                        te => te.tarea.IdMeta,
+                        meta => meta.IdMeta,
+                        (te, meta) => new
+                        {
+                            te.tarea.IdTarea,
+                            te.tarea.NombreTarea,
+                            te.tarea.FechaRegistro,
+                            te.tarea.IdMeta,
+                            te.tarea.IdEstatus,
+                            EstatusNombre = te.estatus.NombreEstatus,
+                            MetaNombre = meta.NombreMeta
+                        }
+                    )
+                    .ToListAsync();
+
                 return Ok(lstTareas);
             }
             catch (Exception ex)
@@ -73,6 +83,7 @@ namespace API_Metas.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
 
         // POST: api/Metas
         [HttpPost]
